@@ -1,0 +1,15 @@
+{
+  "name": "ephemeris",
+  "description": "Передача смены через дейлик: сессия закрывает день в issue, следующая поднимает контекст по адресам и продолжает",
+  "version": "0.1.0",
+  "author": {
+    "name": "ZenonEl"
+  },
+  "keywords": [
+    "daily",
+    "handoff",
+    "context",
+    "github-issues",
+    "devlog"
+  ]
+}
