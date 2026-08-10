@@ -104,9 +104,21 @@ repo     = <owner>/<repo>
 
 ### Установка
 
-```bash
-git clone <this-repo> ~/.claude/plugins/ephemeris
+Claude Code — через маркетплейс, репа сама им и является:
+
 ```
+/plugin marketplace add <owner>/<repo>
+/plugin install ephemeris@ephemeris
+```
+
+Codex читает навыки из `~/.agents/skills/`, поэтому там достаточно ссылки:
+
+```bash
+ln -sfn <путь-до-репы>/skills/daily-handoff ~/.agents/skills/daily-handoff
+```
+
+Навык самодостаточен и слэш-команд не требует: в Codex те же четыре действия
+вызываются словами. Команды в `commands/` — обёртки только для Claude Code.
 
 Зависимости — `gh` с доступом к репе дейликов. Её адрес и assignee задаются
 в `~/.config/ephemeris/daily.conf` и в репозиторий не попадают.
