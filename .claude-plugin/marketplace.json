@@ -8,8 +8,8 @@
     {
       "name": "ephemeris",
       "source": "./",
-      "description": "Четыре команды на цикл дня: init, update, handoff, resume",
-      "version": "0.3.0"
+      "description": "Пять команд на цикл дня: init, update, pass, handoff, resume",
+      "version": "0.4.0"
     }
   ]
 }
