@@ -1,119 +1,76 @@
-# ephemeris
+# Ephemeris
 
-**Дейлики.** Дейлик как точка передачи смены: сессия закрывает в нём день,
-следующая поднимается по нему и продолжает с места.
+[![Version](https://img.shields.io/badge/version-0.5.0-6f42c1.svg)](#status)
+[![Instructions](https://img.shields.io/badge/package-agent%20instructions-0969da.svg)](skills/daily-handoff/SKILL.md)
+[![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE-docs)
 
-> Статус: 🧪 первая версия — пять команд на цикл дня и два контура.
-> Скриптов нет, только навык. Он же кладётся в `~/.codex/skills/` и работает
-> в Codex — формат навыков там тот же.
-> Приватный по природе: завязан на соглашения конкретной команды.
+**English** · [Русский](README.ru.md)
 
----
+Ephemeris is a Claude Code plugin and Codex skill for issue-based daily
+handoffs. One daily issue keeps the state of a project day. When an agent
+session ends, it leaves source addresses for the next session instead of
+rewriting the same context into another summary.
 
-## Что уже есть
+The package contains agent instructions, not an application or background
+service. GitHub issues remain the visible record, while project evidence can
+stay in its original repository or archive.
 
-Система дейликов живёт в приватной репе организации и работает:
-один issue = пара (дата, проект), заголовок `YYYY-MM-DD — <Проект>`, лейбл
-проекта, assignee. Тело — срез для начальства, прогнанный через `humanizer`.
-Комментарии — технический devlog без причёсывания. Больше сотни заполненных
-дейликов.
+## Daily cycle
 
-Шаблон тела фиксированный: `📍 Стадия`, `✅ Сделано`, `⏳ Последовательность`,
-`🎯 Глобальные задачи`, `⚠️ Critical risk`, `❌ Осталось open`, `🔒 Blocked`.
+| Command | Purpose |
+|---|---|
+| `/ephemeris:init` | Open the daily issue and carry over unfinished work. |
+| `/ephemeris:update` | Update state and append technical notes during the day. |
+| `/ephemeris:pass` | Hand the current session to another session without closing the day. |
+| `/ephemeris:handoff` | Finish the day, record the final state, and mark it ready for cleanup. |
+| `/ephemeris:resume` | Resolve the recorded addresses and continue from verified context. |
 
-## Проблема, которую решаем
-
-Формулировка владельца:
-
-> 25 открытых вопросов живут в комментарии к issue, и единственный способ
-> узнать их состояние — перечитать комментарий.
-
-Секции `❌ Осталось open`, `🔒 Blocked` и `🎯 Глобальные задачи` — это
-**состояние**, которое переживает день. Но лежит оно прозой внутри тела issue.
-Поэтому нельзя спросить «что висит в blocked третий день», «какие вопросы
-открыты по такому-то проекту», «что перешло со вчера» — можно только перечитать.
-
-Плагин, который просто заполняет markdown-шаблон, эту болезнь воспроизведёт,
-только быстрее.
-
-## Первая версия — передача смены
-
-Главный читатель дейлика — не начальство, а **следующая сессия**. Сейчас отчёт о
-дне живёт в чате, и переносишь его руками: сессия проговаривает, что сделала и
-куда сложила, ты компактишь и вставляешь этот текст в новый чат. Работает, пока
-курьер — ты; умирает вместе с чатом.
-
-Первая версия убирает курьера. Отчёт уходит комментарием в дейлик, и следующая
-сессия читает его оттуда.
-
-Дейлик при этом живой: заводится утром с планом или в обед, правится весь день,
-и только вечером закрывается. Поэтому команд пять, а не одна.
-
-```
-/ephemeris:init       завести дейлик: план дня, перенос вчерашних задач и блокеров
-/ephemeris:update     обновить по ходу: статусы, стадия, devlog в комментарии
-/ephemeris:pass       передать сессию: кончается контекст, а день продолжается
-/ephemeris:handoff    сдать смену: зафиксировать → довести дейлик → дописать передачу
-/ephemeris:resume     поднять смену: найти передачу, пройти по адресам, доложить
+```mermaid
+flowchart LR
+    work["Work and source artifacts"] --> daily["Daily GitHub issue"]
+    daily --> pass["Session handoff"]
+    pass --> resolve["Resolve ctx IDs, issues, PRs, and commits"]
+    resolve --> next["Next agent session"]
+    next --> daily
 ```
 
-`update` ничего не фиксирует и передачу не пишет — это просто запись
-происходящего. `pass` и `handoff` отличаются охватом, а не сутью: после первого
-день идёт дальше, после второго его можно не помнить.
+## Requirements
 
-**День и сессия — разные единицы.** Дейлик привязан к дню, а заканчивается
-сессия; у ассистента с небольшим окном их за день несколько. `pass` закрывает
-сессию, не трогая итогов дня.
+- [`gh`](https://cli.github.com/), authenticated for the repository that stores
+  the daily issues.
+- **A repository for the dailies.** Ephemeris does not create the convention,
+  it follows one. That repository holds one issue per (date, project) and keeps
+  the body template in its own `README.md`.
 
-### Передача — карта, а не пересказ
+Ephemeris reads that template before writing anything, and never stores a copy
+of it. Reporting formats change; a copy inside a plugin would fall behind in
+silence.
 
-Передача не грузит следующую сессию содержимым, а говорит, что где лежит.
-Пересказ внутри комментария — это вторая копия написанного рядом: она разойдётся
-с оригиналом и съест место в окне.
+## Install
 
-Поэтому в передаче адреса, а решение читать принимает тот, кто работает. Не
-понадобилось — не читал; понадобилось позже — вернулся и дочитал, адрес никуда
-не делся. Даже в большом окне выбор должен оставаться за ним, а не за тем, кто
-писал передачу вчера.
-
-По той же причине комментарий адресуется идентификатором `#issuecomment-<id>`, а
-не словами «комментарий выше»: положение перестаёт быть правдой при следующем же
-комментарии.
-
-Шаблон тела берётся из `README.md` репы дейликов и здесь не дублируется: он
-меняется вместе с отчётностью, а копия молча отстала бы.
-
-### Метка и недельная чистка
-
-`handoff` вешает на сданный дейлик `ready-to-close` — метка уже была заведена в
-репе и означает ровно это. Метки в контуре нет — команда создаёт её с тем же
-смыслом, а не выдумывает своё имя. `pass` метку не вешает: сессия кончилась,
-а день нет.
-
-Дейлики копятся открытыми, потому что закрывать их посреди недели незачем.
-Разумный момент — смена недели: при сдаче дня команда сравнивает ISO-неделю
-сегодняшнего дня с неделями открытых дейликов проекта и, если та сменилась,
-предлагает закрыть старые причиной `completed`.
-
-Под чистку попадает только пересечение трёх условий: **этот проект**, метка
-**`ready-to-close`** и **прошлая неделя или раньше**. Текущая не трогается
-никогда. Дейлик без метки остался открытым не случайно — его не сдавали, и
-закрыть его молча значит потерять сигнал.
-
-Список показывается до закрытия и ждёт подтверждения: пачка закрытий видна всей
-организации, а разбирать ошибку придётся руками.
-
-### Контуры
-
-Рабочие и личные дейлики живут в **разных репозиториях**, и разделены они
-адресом, а не лейблом внутри одной репы: иначе рабочая подробность однажды
-окажется в личной ленте. Соглашения у контуров тоже разные — где-то есть
-assignee, где-то нет, шаблоны расходятся, — поэтому шаблон читается из репы
-того контура, в который идёт запись.
+Claude Code:
 
 ```
-~/.config/ephemeris/daily.conf
+/plugin marketplace add ZenonEl/ephemeris
+/plugin install ephemeris@ephemeris
+```
 
+Codex uses the same skill without the commands. Link it into the skill
+directory:
+
+```bash
+ln -s "$PWD/skills/daily-handoff" ~/.codex/skills/daily-handoff
+```
+
+There it is triggered by phrasing rather than by a slash command.
+
+## Configuration
+
+Repository addresses live outside this package, in
+`~/.config/ephemeris/daily.conf`:
+
+```ini
 default = work
 
 [work]
@@ -124,158 +81,78 @@ assignee = @<login>
 repo     = <owner>/<repo>
 ```
 
-Контур берётся названным явно, иначе выводится по лейблу проекта — наборы
-лейблов у контуров не пересекаются. Совпали оба или ни одного — команда
-спрашивает. Угадывать тут нельзя: ошибка заметна не сразу.
+Every section is a contour. `assignee` is optional — contours may follow
+different conventions, and Ephemeris reads each one from its own repository
+rather than carrying settings across.
 
-Порядок в `handoff` не переставляется: сначала всё зафиксировано, потом отчёт.
-Отчёт — производная от сделанного и поэтому не может пообещать того, чего нет.
+If the file or the requested contour is missing, the instructions require the
+agent to ask instead of guessing a default.
 
-`resume` комментарию на слово не верит: он **ходит по адресам** — `ctx:` в архив,
-`<owner>/<репо>#110` через `gh`, sha через `git show` — и говорит вслух, что не
-разрешилось. Иначе контекст поднимается наполовину и молча.
+## Design choices
 
-Ссылка на материал архива пишется только как `ctx:<slug>#<id>`. У остального
-адреса может не быть — «прод открывается, проверил руками» проверяемым не
-притворяется и живёт в секции `Состояние`.
+### A handoff is an address map
 
-Скриптов нет намеренно. Список того, что входит в закрытие смены, вырастет из
-тех дней, когда что-то потерялось; фиксировать его сейчас значит зафиксировать
-случайный.
+A copied summary becomes a second version of nearby information and can drift
+from it. Ephemeris records stable addresses instead: a GitHub comment ID, an
+issue or pull request, a commit, a path, or a `ctx:<slug>#<id>` citation. The
+receiving session resolves each address and reports anything it cannot open.
 
-### Установка
+The reader decides what to open. An address costs almost nothing to carry and
+can be followed later; a summary spends context on a decision that was already
+made by someone else.
 
-```bash
-git clone <this-repo> ~/.claude/plugins/ephemeris
-```
+### A day and a session are different units
 
-Зависимости — `gh` с доступом к репе дейликов. Её адрес и assignee задаются
-в `~/.config/ephemeris/daily.conf` и в репозиторий не попадают.
+Several agent sessions may work during one day. `pass` closes only the current
+session; `handoff` closes the work day. This keeps one daily issue per project
+and date without forcing intermediate sessions to write a final report.
 
-## Куда это растёт
+### Work and personal records stay separate
 
-Ниже — направление, а не первая версия.
+Ephemeris selects a configured contour before it writes anything. Work and
+personal dailies use different repositories rather than labels in one shared
+repository. If the contour cannot be selected unambiguously, the instructions
+require the agent to ask.
 
-Тот же приём, что сделал `INDEX.md` в [mnemo](../mnemo) надёжным: **источником
-истины становится машиночитаемое состояние, а человекочитаемое из него
-генерируется.**
+### Cleanup is explicit
 
-```
-состояние (локально)  ──рендер──>  тело issue  ──gh──>  репа дейликов
-     ▲                                                        │
-     └─────────────── перенос назавтра ◄───────────────────────┘
-```
+A completed handoff receives the `ready-to-close` label. On a later week,
+Ephemeris can propose closing older labelled dailies for the same project. It
+shows the list first and waits for confirmation.
 
-**В состоянии живёт только то, что переживает день и при этом принадлежит
-ephemeris:**
+A daily without the label stays open on purpose: it was never handed off, and
+closing it silently would erase that signal.
 
-- глобальные задачи фазы (`🎯`) со статусами;
-- перенесённое со вчера.
+## Place in the toolchain
 
-**Однодневное состоянием не делаем.** `📍 Стадия` и `✅ Сделано` пишутся как
-есть: они не переживают день, и структура им не нужна.
-
-**Вопросы и блокеры ephemeris не хранит** — их источник mnemo, см. ниже.
-
-## Откуда берутся вопросы и блокеры
-
-Секции `❌ Осталось open` и `🔒 Blocked` рисуются из архива, а не из
-собственного состояния. Граница проходит **по провенансу**: у вопроса и блокера
-есть автор, дата, доказательство и то, чем он закрыт, — значит место им там, где
-провенанс уже устроен. Держать их и здесь означало бы два источника истины ровно
-для того, ради чего всё затевалось.
-
-Способ чтения — **контракт**, а не разбор чужого файла:
-
-```
-mnemo_audit.py --export <dir> --json --open-only
-```
-
-Вывод приходит уже отсортированным (блокирующее вперёд, среди блокирующего —
-давнее вперёд) и с выведенным состоянием: `state`, `blocked_since`,
-`days_blocked`, `superseded_by`. Пересчитывать это у себя **нельзя**: два места,
-вычисляющие «открыт ли вопрос», расходятся молча — оба ответа выглядят
-правдоподобно.
-
-Контракт `2`. Хранимых двойников выведенных полей в выводе нет намеренно:
-`blocking_since` и булево `superseded` убраны, потому что отличались от соседа
-парой букв. Проверяй `query_contract` и отказывайся работать при незнакомой
-major-версии.
-
-Нормативное описание и правила совместимости —
-[`mnemo/SPEC/QUERY.md`](../mnemo/SPEC/QUERY.md).
-
-### Про развязку — точная формулировка
-
-Ранняя фраза «у трёх проектов нет ничего общего, кроме строки `ctx:`» неверна и
-снята. Разделяются **три опубликованных версионированных формата**: ссылка,
-манифест и контракт чтения. Не разделяется ничего исполняемого — ни библиотеки,
-ни базы, ни общего процесса.
-
-Зависимость ephemeris → mnemo **односторонняя и признанная**: ephemeris знает
-про архив, архив про ephemeris не знает и не обязан. Это та же связь, какая у
-ephemeris уже есть с `gh`. Отдельным проектом он остаётся потому, что его
-работа — рендер (значки, два регистра, humanizer), синк в issues (лейблы,
-assignee, кросс-реповые ссылки) и однодневное состояние без провенанса. Хранение
-вопросов его работой не является, а перенести рендер в mnemo нельзя: тогда
-публичный стандарт начнёт владеть соглашениями одной команды.
-
-## Два регистра текста
-
-Правило команды, которое нельзя терять при автоматизации:
-
-- **тело для начальства** — живой язык, через `humanizer`, без AI-тэллов;
-  обязательные значки-заголовки сохраняются, это формат, а не украшение;
-- **devlog в комментариях** — обычный технический язык, детальный дамп,
-  **без** `humanizer`.
-
-Для поиска и для ассистента ценнее devlog. Генератор обязан различать регистры,
-а не выдавать один и тот же текст в оба.
-
-## Почему отдельный проект, а не часть mnemo
-
-- **Разные глаголы.** mnemo принимает чужой материал; дейлик ты пишешь сам.
-  Провенанс здесь не нужен — автор известен.
-- **Разное владение.** Дейлики живут в приватной репе организации. У mnemo
-  записано прямым текстом: трекерами он не владеет, читает и связывает.
-- **Соглашения команды.** Значки, лейблы, assignee, humanizer, правило
-  кросс-реповых ссылок `<owner>/<репо>#110` вместо голого `#110` — это порядок
-  конкретной организации. В публичном стандарте ему нечего делать, а без него
-  остался бы пустой шаблон.
-- **Разный темп.** mnemo стабилизируется; формат отчётности меняется вместе с
-  тем, как меняется отчётность.
-
-## Ссылки на записи
-
-```
-ctx:<slug>#<id>          ctx:priyomka#i004   ctx:sozvony#q012
-```
-
-Дейлик цитирует материал и решения этим форматом. Обратно: запись-факт в
-архиве переходит в `distributed` с указанием issue.
-
-Нормативное описание — [`mnemo/SPEC/CITATION.md`](../mnemo/SPEC/CITATION.md).
-
-`ctx` — от «context», а не от имени инструмента: программа может смениться,
-ссылка не должна умирать.
-
-## Место в связке
-
-| Проект | Роль |
+| Project | Responsibility |
 |---|---|
-| [mnemo](../mnemo) | архив материала с провенансом + факты, решения, вопросы |
-| **ephemeris** | **дейлики: состояние и синк в issues** |
-| [herald](../herald) | канал наружу к людям |
+| [mnemo](https://github.com/ZenonEl/mnemo) | Stores source material, provenance, decisions, and open questions. |
+| **Ephemeris** | Tracks the day and passes source addresses between sessions. |
+| [herald](https://github.com/ZenonEl/herald) | Moves messages and files between people and agents. |
 
-## Лицензии
+The projects exchange published formats and links. They do not share a runtime,
+database, or library.
 
-Как в [mnemo](../mnemo) — по частям:
+## Package layout
 
-| Путь | Лицензия |
-|---|---|
-| `commands/`, `skills/` — исполняемые инструкции | [AGPL-3.0-or-later](LICENSE) |
-| `README.md` и прочий текст | [CC BY-SA 4.0](LICENSE-docs) |
+```text
+.claude-plugin/          Claude Code plugin and marketplace manifests
+commands/                Five Claude Code commands
+skills/daily-handoff/    The portable skill used by Codex
+```
 
-Навык и команды — код: их выполняет агент, и осмысленный сценарий развития
-(обёртка-сервис поверх дейликов) иначе позволял бы закрыть производную.
-Текст — текст, и вирусность нужна на его редакции.
+## Status
+
+Ephemeris is an early `0.5.0` specification package maintained by one author.
+It has no executable code, automated tests, CI, or usage telemetry. The current
+value is the documented handoff protocol and its separation of daily state,
+source evidence, and communication.
+
+Command descriptions and the skill body are written in Russian, the working
+language of its author.
+
+## Licenses
+
+- `commands/` and `skills/`: [AGPL-3.0-or-later](LICENSE)
+- documentation: [CC BY-SA 4.0](LICENSE-docs)
