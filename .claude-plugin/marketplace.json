@@ -1,6 +1,6 @@
 {
   "name": "ephemeris",
-  "description": "Дейлик как точка передачи смены: завести, вести, сдать, поднять",
+  "description": "Daily handoffs through GitHub issues: open, keep, pass, close, resume",
   "owner": {
     "name": "ZenonEl"
   },
@@ -8,8 +8,8 @@
     {
       "name": "ephemeris",
       "source": "./",
-      "description": "Пять команд на цикл дня: init, update, pass, handoff, resume",
-      "version": "0.5.0"
+      "description": "Five commands for the work day: init, update, pass, handoff, resume",
+      "version": "0.6.0"
     }
   ]
 }

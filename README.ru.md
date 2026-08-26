@@ -1,6 +1,6 @@
 # Ephemeris
 
-[![Version](https://img.shields.io/badge/version-0.5.0-6f42c1.svg)](#статус)
+[![Version](https://img.shields.io/badge/version-0.6.0-6f42c1.svg)](#статус)
 [![Instructions](https://img.shields.io/badge/package-agent%20instructions-0969da.svg)](skills/daily-handoff/SKILL.md)
 [![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE-docs)
@@ -54,13 +54,28 @@ Claude Code:
 /plugin install ephemeris@ephemeris
 ```
 
-Codex использует тот же навык, но без команд. Прилинковать в каталог навыков:
+Codex:
 
-```bash
-ln -s "$PWD/skills/daily-handoff" ~/.codex/skills/daily-handoff
+```
+codex plugin marketplace add ZenonEl/ephemeris
+codex plugin add ephemeris@ephemeris
 ```
 
-Там он срабатывает по формулировке, а не по слэш-команде.
+Оба хоста ставят один и тот же навык из одного каталога. Слэш-команд в Codex
+нет, поэтому там навык срабатывает по формулировке; названия команд выше — это
+имена операций, и каждую навык описывает сам по себе.
+
+## Обновление
+
+```
+/plugin marketplace update ephemeris          # Claude Code
+codex plugin marketplace upgrade              # Codex, затем codex plugin add заново
+```
+
+Оба хоста сравнивают **только номер версии**. Номер записан в трёх манифестах и
+двух бейджах README, поэтому `scripts/check-versions.py` сверяет их машинно:
+отставший манифест означает, что правка не доедет до установленных копий, а
+команда обновления отрапортует, что всё уже свежее.
 
 ## Настройка
 
@@ -133,15 +148,22 @@ repo     = <owner>/<repo>
 
 ```text
 .claude-plugin/          манифесты плагина и маркетплейса Claude Code
+.codex-plugin/           манифест плагина Codex
+.agents/plugins/         запись маркетплейса Codex
 commands/                пять команд Claude Code
-skills/daily-handoff/    переносимый навык, он же используется в Codex
+skills/daily-handoff/    переносимый навык, общий для обоих хостов
+scripts/                 сверка версий
 ```
+
+Копия навыка одна, а не по одной на хост. Две копии учили бы двум разным
+правилам и разошлись бы незаметно.
 
 ## Статус
 
-Ephemeris — ранний пакет спецификации версии `0.5.0`, у него один автор.
-Исполняемого кода, автотестов, CI и телеметрии нет. Ценность на сегодня — сам
-описанный протокол передачи и разделение состояния дня, материала и связи.
+Ephemeris — ранний пакет спецификации версии `0.6.0`, у него один автор.
+Единственный исполняемый файл сверяет номер версии между манифестами;
+автотестов, CI и телеметрии нет. Ценность на сегодня — сам описанный протокол
+передачи и разделение состояния дня, материала и связи.
 
 ## Лицензии
 

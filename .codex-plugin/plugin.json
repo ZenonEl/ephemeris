@@ -1,0 +1,39 @@
+{
+  "name": "ephemeris",
+  "version": "0.6.0",
+  "description": "Issue-based daily handoffs for coding agents: pass source addresses between sessions instead of re-summarising context",
+  "author": {
+    "name": "ZenonEl",
+    "url": "https://github.com/ZenonEl"
+  },
+  "homepage": "https://github.com/ZenonEl/ephemeris",
+  "repository": "https://github.com/ZenonEl/ephemeris",
+  "license": "AGPL-3.0-or-later",
+  "keywords": [
+    "daily",
+    "handoff",
+    "context",
+    "github-issues",
+    "devlog"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ephemeris",
+    "shortDescription": "Daily handoffs that pass addresses, not summaries",
+    "longDescription": "One GitHub issue holds the state of a project day. When a session ends it leaves stable addresses — comment IDs, issues, commits, ctx citations — and the next session resolves them and reports whatever it cannot open.",
+    "developerName": "ZenonEl",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write",
+      "GitHub issues"
+    ],
+    "defaultPrompt": [
+      "Заведи дейлик на сегодня и перенеси незакрытое.",
+      "Передай сессию: кончается контекст.",
+      "Подними смену по последней передаче."
+    ],
+    "websiteURL": "https://github.com/ZenonEl/ephemeris",
+    "screenshots": []
+  }
+}

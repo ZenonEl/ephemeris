@@ -1,0 +1,20 @@
+{
+  "name": "ephemeris",
+  "interface": {
+    "displayName": "Ephemeris"
+  },
+  "plugins": [
+    {
+      "name": "ephemeris",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

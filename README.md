@@ -1,6 +1,6 @@
 # Ephemeris
 
-[![Version](https://img.shields.io/badge/version-0.5.0-6f42c1.svg)](#status)
+[![Version](https://img.shields.io/badge/version-0.6.0-6f42c1.svg)](#status)
 [![Instructions](https://img.shields.io/badge/package-agent%20instructions-0969da.svg)](skills/daily-handoff/SKILL.md)
 [![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE-docs)
@@ -56,14 +56,28 @@ Claude Code:
 /plugin install ephemeris@ephemeris
 ```
 
-Codex uses the same skill without the commands. Link it into the skill
-directory:
+Codex:
 
-```bash
-ln -s "$PWD/skills/daily-handoff" ~/.codex/skills/daily-handoff
+```
+codex plugin marketplace add ZenonEl/ephemeris
+codex plugin add ephemeris@ephemeris
 ```
 
-There it is triggered by phrasing rather than by a slash command.
+Both hosts install the same skill from the same directory. Codex has no slash
+commands, so there the skill is triggered by phrasing; the command names above
+are operation names, and the skill describes each operation on its own.
+
+## Update
+
+```
+/plugin marketplace update ephemeris          # Claude Code
+codex plugin marketplace upgrade              # Codex, then codex plugin add again
+```
+
+Both hosts compare **only the version number**. The number lives in three
+manifests and two README badges, so `scripts/check-versions.py` verifies they
+agree — a stale manifest means the change never reaches installed copies while
+the update command reports everything as current.
 
 ## Configuration
 
@@ -138,14 +152,21 @@ database, or library.
 
 ```text
 .claude-plugin/          Claude Code plugin and marketplace manifests
+.codex-plugin/           Codex plugin manifest
+.agents/plugins/         Codex marketplace entry
 commands/                Five Claude Code commands
-skills/daily-handoff/    The portable skill used by Codex
+skills/daily-handoff/    The portable skill, shared by both hosts
+scripts/                 Version-consistency check
 ```
+
+There is one copy of the skill, not one per host. Two copies would teach two
+different sets of rules and drift apart unnoticed.
 
 ## Status
 
-Ephemeris is an early `0.5.0` specification package maintained by one author.
-It has no executable code, automated tests, CI, or usage telemetry. The current
+Ephemeris is an early `0.6.0` specification package maintained by one author.
+Its only executable file checks that the version number matches across
+manifests; there are no automated tests, CI, or usage telemetry. The current
 value is the documented handoff protocol and its separation of daily state,
 source evidence, and communication.
 
