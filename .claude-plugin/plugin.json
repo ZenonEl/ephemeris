@@ -1,7 +1,7 @@
 {
   "name": "ephemeris",
   "description": "Issue-based daily handoffs for coding agents: pass source addresses between sessions instead of re-summarising context",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "author": {
     "name": "ZenonEl"
   },

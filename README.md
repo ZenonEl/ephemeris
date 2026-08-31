@@ -1,6 +1,6 @@
 # Ephemeris
 
-[![Version](https://img.shields.io/badge/version-0.6.0-6f42c1.svg)](#status)
+[![Version](https://img.shields.io/badge/version-0.7.0-6f42c1.svg)](#status)
 [![Instructions](https://img.shields.io/badge/package-agent%20instructions-0969da.svg)](skills/daily-handoff/SKILL.md)
 [![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE-docs)
@@ -128,6 +128,29 @@ personal dailies use different repositories rather than labels in one shared
 repository. If the contour cannot be selected unambiguously, the instructions
 require the agent to ask.
 
+### Several sessions share one daily
+
+The unit of markup is the **session** — not the project, the agent, or the model.
+Two terminals on one project in one day are two sessions even when the same
+person runs both.
+
+Each session keeps its own analyses inside its own block and edits nothing
+outside it:
+
+```markdown
+<!-- ephemeris:begin session="checkout" -->
+## 🛠 checkout — what this session worked through
+<!-- ephemeris:end session="checkout" -->
+```
+
+Shared sections stay shared: stage, done, phase goals and blockers are common to
+the day, and ownership is written into the status line itself
+(`🔒 blocked, checkout's area`, `🔄 led by checkout`). Comments carry the session
+in their marker, so `resume` can pick up the right thread.
+
+Sessions are named, never numbered. "The second session" counts from whoever is
+speaking; for the other session the second one is somebody else.
+
 ### Cleanup is explicit
 
 A completed handoff receives the `ready-to-close` label. On a later week,
@@ -164,7 +187,7 @@ different sets of rules and drift apart unnoticed.
 
 ## Status
 
-Ephemeris is an early `0.6.0` specification package maintained by one author.
+Ephemeris is an early `0.7.0` specification package maintained by one author.
 Its only executable file checks that the version number matches across
 manifests; there are no automated tests, CI, or usage telemetry. The current
 value is the documented handoff protocol and its separation of daily state,
