@@ -1,6 +1,6 @@
 # Ephemeris
 
-[![Version](https://img.shields.io/badge/version-0.7.1-6f42c1.svg)](#status)
+[![Version](https://img.shields.io/badge/version-0.8.0-6f42c1.svg)](#status)
 [![Instructions](https://img.shields.io/badge/package-agent%20instructions-0969da.svg)](skills/daily-handoff/SKILL.md)
 [![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE-docs)
@@ -187,7 +187,7 @@ different sets of rules and drift apart unnoticed.
 
 ## Status
 
-Ephemeris is an early `0.7.1` specification package maintained by one author.
+Ephemeris is an early `0.8.0` specification package maintained by one author.
 Its only executable file checks that the version number matches across
 manifests; there are no automated tests, CI, or usage telemetry. The current
 value is the documented handoff protocol and its separation of daily state,

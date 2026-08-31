@@ -1,6 +1,6 @@
 # Ephemeris
 
-[![Version](https://img.shields.io/badge/version-0.7.1-6f42c1.svg)](#статус)
+[![Version](https://img.shields.io/badge/version-0.8.0-6f42c1.svg)](#статус)
 [![Instructions](https://img.shields.io/badge/package-agent%20instructions-0969da.svg)](skills/daily-handoff/SKILL.md)
 [![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE-docs)
@@ -181,7 +181,7 @@ scripts/                 сверка версий
 
 ## Статус
 
-Ephemeris — ранний пакет спецификации версии `0.7.1`, у него один автор.
+Ephemeris — ранний пакет спецификации версии `0.8.0`, у него один автор.
 Единственный исполняемый файл сверяет номер версии между манифестами;
 автотестов, CI и телеметрии нет. Ценность на сегодня — сам описанный протокол
 передачи и разделение состояния дня, материала и связи.
