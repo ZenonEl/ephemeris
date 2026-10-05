@@ -9,7 +9,7 @@
       "name": "ephemeris",
       "source": "./",
       "description": "Five commands for the work day: init, update, pass, handoff, resume",
-      "version": "0.9.0"
+      "version": "0.9.1"
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 name: daily-handoff
-description: "Use when opening, updating, passing between sessions, closing or picking up a work day — creating the daily issue with the day's plan, updating it mid-day, handing over when a session runs out of context, fixating everything at day's end, and restoring context from it in a fresh session. Triggers on: заведи дейлик, дейлик на сегодня, план на день, обнови дейлик, допиши в дейлик, передай сессию, кончается контекст, закрываем сессию, передача смены, сдай смену, закрываем день, зафиксируй всё, подними контекст, продолжаем с прошлого раза, что было вчера, open the daily, update the daily, hand over, handoff, resume, close the day."
+description: "Use when working with a project's daily issue: opening it for the day, recording work into it as the day goes, handing the session over when the context runs out, closing the day, or restoring context in a fresh session from the last handoff. Match on intent in any language, not on these words: start the daily, today's daily, plan for the day, update the daily, log this into the daily, hand over, pass the session, running out of context, close the day, wrap the day up, fixate everything, resume, pick up where we left off, what happened yesterday. Same intents in Russian: заведи дейлик, обнови дейлик, передай сессию, сдай смену, подними контекст."
 ---
 
 # Daily: open, keep, pass, close, resume
