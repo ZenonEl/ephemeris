@@ -1,39 +1,41 @@
 ---
-description: Закрыть смену — зафиксировать всё и дописать передачу в дейлик
-argument-hint: Имя сессии; проект и контур — work | personal, если не очевидны
+description: Close the day — fixate everything and write the day's handoff
+argument-hint: Session name; project and contour (work | personal) if not obvious
 ---
 
-Используй навык **ephemeris:daily-handoff**.
+Use the **ephemeris:daily-handoff** skill.
 
-**Сначала проверь, сдан ли день:** есть ли за сегодня комментарий с маркером
-`<!-- ephemeris:handoff … kind="day" -->`.
+**Read the live state first:** contour, today's daily, its body and comments, the
+sessions present, and whether a `<!-- ephemeris:handoff … kind="day" -->` comment
+already exists. **Re-read the comments immediately before writing** — another
+session may have closed the day in the meantime.
 
-**Есть** — день закрыла другая сессия. Общие секции не пересобирай, `ready-to-close`
-повторно не вешай, неделю не проверяй. Зафиксируй своё и допиши свою передачу
-отдельным комментарием ниже, обычным `pass`-видом, указав первой строкой, кто и
-где закрыл день. Чужой комментарий не редактируй.
+**It exists — the day is already closed by another session.** Do not rebuild the
+shared sections, do not re-apply `ready-to-close`, do not run the weekly sweep.
+Fixate your own work and add your handoff as a separate comment below in the
+ordinary pass form, naming in its first line who closed the day and where. Do not
+edit their comment.
 
-**Нет** — день сдаёшь ты, в таком порядке, не меняя его:
+**It does not exist — you are closing the day**, in this order:
 
-1. **Зафиксируй.** Незакоммиченное — в коммит, ветки — в пуш, worktree из `/tmp` —
-   наружу. Что уезжает в память, чат-экспорт, локальные доки — запиши сейчас.
-2. **Доведи дейлик до финального вида** — то же, что `/ephemeris:update`, но за
-   весь день. Детали — комментарием-дампом без `humanizer`. Дейлика нет —
-   сначала заведи.
-3. **Допиши комментарий-передачу** с маркером
-   `<!-- ephemeris:handoff session="<имя>" kind="day" -->`. Сводя день, общие секции
-   приводи в порядок, а блоки чужих сессий не переписывай.
+1. **Fixate.** Uncommitted into a commit, branches pushed, worktrees out of
+   `/tmp`. Whatever goes to memory, archive or local docs is written now.
+2. **Bring the daily to its final form** — as `/ephemeris:update`, but for the
+   whole day. Detail goes into a dump comment. No daily at all — open one first.
+   Other sessions' blocks are not rewritten.
+3. **Add the handoff comment** with `kind="day"`. Session handoffs from today are
+   collected **as addresses**, not retold.
+4. **Verify it landed once:** re-read the comments and confirm exactly one
+   `kind="day"` for today. More — say so plainly.
+5. **Apply `ready-to-close`**; create the label in this contour if it is missing.
+6. **Check the week.** The ISO week changed — offer to close this project's
+   dailies from **previous** weeks that carry `ready-to-close`, with reason
+   `completed`. Show the list and wait: the batch is visible to everyone. Without
+   the label do not close — such a daily was never handed over.
 
-4. **Повесь `ready-to-close`** — день сдан, дейлик готов к закрытию. Метки нет в
-   этом контуре — создай с тем же смыслом.
-5. **Проверь неделю.** Сменилась ISO-неделя — предложи закрыть дейлики этого
-   проекта из **прошлых** недель, у которых есть `ready-to-close`, причиной
-   `completed`. Покажи список и дождись подтверждения: закрытие идёт пачкой и
-   видно всем. Без метки не закрывай — такой дейлик не сдавали.
+Nothing goes into the handoff that you did not do. Did not manage it — `Not
+closed`. Archive material is referenced only as `ctx:<slug>#<id>`.
 
-В передачу не пишется то, чего ты не сделал. Не успел — секция `Не закрыто`.
-Ссылка на материал архива — только в форме `ctx:<slug>#<id>`.
+Write in the language of the daily. Show me the text before sending.
 
-Перед тем как писать передачу, покажи мне её текст.
-
-Проект: $ARGUMENTS
+Session: $ARGUMENTS

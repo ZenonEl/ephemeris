@@ -1,53 +1,182 @@
 ---
 name: daily-handoff
-description: "Use when opening, updating, passing between sessions, closing or picking up a work day — creating the daily issue with the day's plan, updating it mid-day, handing over when a session runs out of context, fixating everything at day's end, and restoring context from it in a fresh session. Triggers on: заведи дейлик, дейлик на сегодня, план на день, обнови дейлик, допиши в дейлик, передай сессию, кончается контекст, закрываем сессию, передача смены, сдай смену, закрываем день, зафиксируй всё, подними контекст, продолжаем с прошлого раза, что было вчера, handoff, resume."
+description: "Use when opening, updating, passing between sessions, closing or picking up a work day — creating the daily issue with the day's plan, updating it mid-day, handing over when a session runs out of context, fixating everything at day's end, and restoring context from it in a fresh session. Triggers on: заведи дейлик, дейлик на сегодня, план на день, обнови дейлик, допиши в дейлик, передай сессию, кончается контекст, закрываем сессию, передача смены, сдай смену, закрываем день, зафиксируй всё, подними контекст, продолжаем с прошлого раза, что было вчера, open the daily, update the daily, hand over, handoff, resume, close the day."
 ---
 
-# Дейлик: завести, вести, передать, сдать, поднять
+# Daily: open, keep, pass, close, resume
 
-Дейлик — не отчётность, а **точка передачи**. Главный его читатель — следующая
-сессия. Она открывает issue и поднимает день целиком: что сделано, где это
-лежит, с чего продолжать. Начальство читает изредка и по диагонали.
+The daily is not a report. It is a **handoff point**, and its main reader is the
+next session: it opens the issue and reconstructs the day — what was done, where
+it lives, what to continue from. Management skims it rarely.
 
-**Дейлик живой.** Он заводится когда угодно — утром с планом, в обед, вечером, —
-и правится весь день: задачи меняют статус, дописываются комментарии, появляются
-секции под то, что случилось. Одно закрытие в конце дня его не описывает.
+**The daily is alive.** It can be opened any time — morning with a plan, midday,
+evening — and is edited all day: statuses change, comments accumulate, sections
+appear for whatever happened. One closing act at day's end does not describe it.
 
-Отсюда пять действий:
+Hence five actions:
 
-| | Когда | Что делает |
+| | When | What it does |
 |---|---|---|
-| **завести** | начало дня | создаёт issue: план, перенос вчерашнего |
-| **обновить** | по ходу дня | правит тело, дописывает комментарии |
-| **передать** | кончается сессия | фиксирует и пишет передачу; день продолжается |
-| **сдать** | конец дня | то же плюс доводит дейлик до финала |
-| **поднять** | новая сессия | читает последнюю передачу, ходит по адресам |
+| **open** | start of day | creates the issue: plan, carry-over from yesterday |
+| **update** | during the day | edits the body, appends comments |
+| **pass** | session runs out | fixates and writes a handoff; the day continues |
+| **close** | end of day | the same plus brings the daily to its final form |
+| **resume** | new session | reads the last handoff, walks the addresses |
 
-Границы: «обновить» ничего не фиксирует и передачу не пишет — это просто запись
-происходящего. «Передать» и «сдать» отличаются охватом, а не сутью: после первого
-день идёт дальше, после второго его можно не помнить.
+Boundaries: *update* fixates nothing and writes no handoff — it is just a record
+of what is happening. *Pass* and *close* differ in scope, not in kind: after the
+first the day continues, after the second the day need not be remembered.
 
-## Главное правило передачи: карта, а не пересказ
+## Language: the package is English, the output is the user's
 
-**Передача не грузит следующую сессию содержимым — она говорит, что где лежит.**
-Пересказать день внутри комментария означает сделать вторую копию того, что уже
-написано рядом: копия разойдётся с оригиналом, а место в окне съест.
+These instructions are English to keep the context cheap. **What a human reads is
+written in that human's language.**
 
-Поэтому передача состоит из адресов. Следующая сессия читает её, видит карту и
-**сама решает**, что ей нужно открыть. Не понадобилось — не читает. Понадобилось
-позже — вернётся и дочитает, адрес никуда не делся.
+- the daily body and comments — the language of the daily repository, matching
+  the surrounding issues and that repo's own template;
+- what you say in the terminal — the user's language;
+- markers, attribute names and status keywords — always as written here.
 
-Это не экономия ради экономии: даже в большом окне выбор должен оставаться за
-тем, кто работает, а не за тем, кто писал передачу вчера.
+Do not translate an existing daily, and do not switch the language of a day
+already in progress.
 
-## Контуры
+## Step 0 — read the live state before writing anything
 
-Дейлики живут в **разных репозиториях по контурам**. Рабочий и личный не
-смешиваются: у них разные владельцы, разные читатели и разная чувствительность
-содержимого. Разделение адресом, а не лейблом внутри одной репы — иначе рабочая
-подробность однажды окажется в личной ленте или наоборот.
+**Every action starts by reading the daily as it is now.** Not from memory, not
+from what an earlier step in this same conversation reported. Sessions run in
+parallel and the issue changes under you.
 
-Адреса лежат **вне этого репозитория** — имена трекеров сюда не попадают:
+```bash
+# 1. the daily for today, in this contour, for this project
+gh issue list -R "$REPO" --label "<Project>" \
+  --search "<YYYY-MM-DD> in:title" --state all --json number,title,state
+
+# 2. its body and comments
+gh issue view <N> -R "$REPO" --json body,comments
+```
+
+From that single read, establish:
+
+| | Why it matters |
+|---|---|
+| does a daily for today exist | *open* must not create a second one |
+| **is there more than one** | duplicates happen — see below |
+| which sessions already wrote | decides your own session name |
+| is the day already closed (`kind="day"`) | decides what *close* does |
+| what the shared sections say now | your edit must not revert someone else's |
+
+Re-read immediately before a write that depends on what you just checked. The
+gap between reading and writing is where a lost update lives.
+
+## Duplicate dailies
+
+Two issues for the same (date, project) do happen — two sessions open one in the
+same minute, or a create is retried.
+
+**Keep the one with the work in it**: comments, a filled body, a later edit. The
+other is an empty twin.
+
+Report both, say which you would keep, and act after confirmation:
+
+```bash
+gh issue close <dup> -R "$REPO" --reason "not planned" \
+  --comment "Duplicate of #<survivor>; the day is recorded there."
+```
+
+If both have content, do not merge them yourself — say so and ask.
+
+## Session names
+
+The unit of markup is the **session**: not the project, not the agent, not the
+model. Two terminals on one project in one day are two sessions even when one
+person runs both.
+
+### Default name
+
+```
+main-<agent>        main-claude · main-codex · main-gemini
+```
+
+`<agent>` is the kind of assistant you are. Take `main-*` when, by step 0, **no
+other session has written in today's daily**.
+
+### When you are not alone
+
+Someone else already wrote → `main-*` is not yours to take. Use a **scope** name:
+
+```
+<scope>-<agent>     panel-claude · orders-codex · launch-audit-claude
+```
+
+The scope is the area this session works in, not a single task: a session that
+fixes one bug and then reviews around it is still one scope. Pick it from what
+you are actually doing; if that is not clear, ask the user once and reuse the
+answer for the rest of the day.
+
+**Names, never ordinals.** "The second session" counts from whoever is speaking;
+for the other session the second one is somebody else. Such records cannot be
+matched and `resume` cannot filter them.
+
+## Markers
+
+The body — one block per session, for that session's write-ups:
+
+```markdown
+<!-- ephemeris:begin session="panel-claude" -->
+## 🛠 panel-claude — what this session worked through
+<!-- ephemeris:end session="panel-claude" -->
+```
+
+**You edit your own block only.** Not when updating, not when closing the day —
+even if you see an error in another block; you write about the error in yours.
+No block yet — create it at the end of the body, before the shared trailing
+sections.
+
+Comments — marker on the first line:
+
+```
+<!-- ephemeris:devlog session="panel-claude" -->
+<!-- ephemeris:handoff session="panel-claude" -->
+<!-- ephemeris:handoff session="panel-claude" kind="day" -->
+```
+
+`resume` looks for `ephemeris:handoff` and finds both handoff kinds. `kind="day"`
+exists only to answer "is the day already closed?". Comments with no session
+name still resolve — those are days that had a single session.
+
+## Shared sections are not wrapped in markers
+
+Stage, done, phase goals and blockers stay common to the day. Ownership is
+written **into the status line itself**:
+
+```
+B14.1  P0: re-booking releases the hold   🔒 race, panel-claude's area
+B14.3  P1: price skips the check          📋 orders-codex's area
+B1     Bug 1: invisible characters        🔄 led by panel-claude
+B1.3   Line in retry.py                   ✅ dropped — panel-claude did it better
+```
+
+**The owner is always named.** "Mine", "ours", "the second one", "she" do not
+appear in shared sections: everyone reads them, and those words mean different
+things depending on who is reading. Your own item carries your own name.
+
+In the blockers section a session stands as a counterparty, like a person:
+
+```
+- **panel-claude** — fixes for the two review blockers. Running review when done
+```
+
+In shared sections edit only your own lines and those you are closing by your own
+work. You do not rewrite another session's line.
+
+## Contours
+
+Dailies live in **separate repositories per contour**. Work and personal do not
+mix: different owners, different readers, different sensitivity. Separation by
+address, not by a label inside one repo — otherwise a work detail lands in the
+personal feed one day, or the other way round.
+
+The addresses live **outside this package**:
 
 ```
 ~/.config/ephemeris/daily.conf
@@ -62,403 +191,305 @@ assignee = <login>
 repo     = <owner>/<repo>
 ```
 
-Файла нет или в нём нет нужного контура — спроси и предложи создать. Ничего не
-подставляй по умолчанию.
+File or contour missing — ask and offer to create it. Default nothing.
 
-**`assignee` передаётся в `gh` голым логином, без `@`.** У `gh --assignee` символ
-`@` зарезервирован под особые значения — `@me`, `@copilot`, — и `@login` он
-отвергает как неизвестное. Стоит в конфиге `@login` — отрежь `@` и работай
-дальше, переспрашивать не нужно. Исключение — сами особые значения: `@me`
-передаётся как есть.
+**`assignee` goes to `gh` as a bare login, without `@`.** In `gh --assignee` the
+`@` is reserved for special values (`@me`, `@copilot`), and `@login` is rejected
+as unknown. A config holding `@login` — strip the `@` and carry on without
+asking. The special values themselves pass through unchanged.
 
-### Как выбирается контур
+### Choosing the contour
 
-**Названо явно** («личный дейлик», «рабочий», аргументом команды) — берётся
-названное, без размышлений.
+**Named explicitly** ("personal daily", "work", a command argument) — take what
+was named.
 
-**Не названо** — определяется по проекту: у какого контура есть лейбл под этот
-проект. Наборы лейблов у контуров не пересекаются, поэтому ответ обычно
-однозначен.
+**Not named** — derive from the project: which contour has a label for it. Label
+sets do not overlap between contours, so the answer is usually unambiguous.
 
 ```bash
 gh label list -R "$REPO" --limit 100 --json name --jq '[.[].name]|join(", ")'
 ```
 
-Совпал ровно один контур — работаем в нём. Совпали оба или ни одного — **спроси**.
-Не угадывай: ошибка контура означает рабочую подробность в личной репе или личную
-в репе организации, и заметишь ты это не сразу.
+Exactly one contour matches — work there. Both or neither — **ask**. Do not
+guess: the wrong contour means a work detail in the personal repo or a personal
+one in the organisation's, and you will not notice soon.
 
-### Соглашения у контуров разные
+### Contour conventions differ
 
-`assignee` может отсутствовать, лейблы могут быть в другом регистре, набор
-обязательных секций может отличаться. Ничего из этого не переноси из одного
-контура в другой — читай шаблон той репы, в которую пишешь.
+`assignee` may be absent, labels may use a different case, the required sections
+may differ. Carry nothing across — read the template of the repo you write into.
 
-## Как найти дейлик
+## The body template lives in the daily repo, not here
 
-Один issue = пара (дата, проект):
-
-```bash
-gh issue list -R "$REPO" \
-  --label "<Проект>" --search "<YYYY-MM-DD> in:title" --state all \
-  --json number,title
-```
-
-Заголовки могли писаться неровно — с разными тире, с префиксом проекта и без.
-Поиск по дате ничего не дал, а лейбл есть — посмотри последние issue с этим
-лейблом глазами, прежде чем решить, что дейлика за сегодня нет.
-
-«Уже есть» — норма, а не повод заводить второй: дейлик мог быть создан в обед и
-правиться весь день.
-
-## Несколько сессий за день
-
-Единица разметки — **сессия**. Не проект, не агент, не модель. Два терминала по
-одному проекту в один день — две сессии, даже если обе ведёт один человек и один
-и тот же ассистент.
-
-### Имя сессии
-
-Короткий тег, задаётся при старте и живёт весь день: `checkout`, `panel`, `pdn`.
-Не назван — спроси один раз и дальше используй его же.
-
-**Порядковыми номерами сессии не называются.** «Вторая сессия» — это счёт от
-говорящего: для другой сессии вторая уже не та же самая. Сопоставить такие
-записи нечем, и `resume` по ним не отфильтрует. Имя однозначно для всех.
-
-### Тело: свой блок между маркерами
-
-Разборы сессии живут в её собственном блоке:
-
-```markdown
-<!-- ephemeris:begin session="checkout" -->
-## 🛠 checkout — разбор невидимых символов
-…
-<!-- ephemeris:end session="checkout" -->
-```
-
-**Правишь только свой блок.** Чужие не трогаешь ни при обновлении, ни при сдаче
-дня — даже если видишь в них ошибку; про ошибку пишешь в своём.
-
-Блока ещё нет — заводишь его в конце тела, перед общими хвостовыми секциями.
-
-### Общие секции маркерами не оборачиваются
-
-`📍 Стадия`, `✅ Сделано`, `🎯 Глобальные задачи`, `🔒 Ждём` остаются общими на
-день. Владение помечается **в самой строке**, как уже принято:
-
-```
-B14.1  P0: переоформление снимает холд   🔒 гонка, зона checkout
-B14.3  P1: цена мимо сверки              📋 зона panel
-B1     Баг 1: невидимые символы          🔄 ведёт checkout
-B1.3   Строка в retry.py                 ✅ снята — checkout сделала лучше
-```
-
-**Владелец всегда назван по имени.** «Моя», «наша», «вторая», «она» в общих
-секциях не пишутся: общие секции читают все сессии, а эти слова означают разное
-в зависимости от того, кто читает. Своя задача помечается своим же именем.
-
-В `🔒 Ждём` сессия стоит контрагентом наравне с человеком:
-
-```
-- **checkout** — фиксы по двум блокерам Codex. Как закончит, прогоняю ревью
-```
-
-Правишь в общих секциях только свои строки и те, что переводишь в закрытые по
-своей работе. Строку чужой сессии не переписываешь.
-
-### Комментарии: маркер первой строкой
-
-```
-<!-- ephemeris:devlog session="checkout" -->
-## 🛠 Devlog — баг 1 и стенд (сессия checkout)
-```
-
-```
-<!-- ephemeris:handoff session="checkout" -->
-## 🔁 Передача сессии — HH:MM
-```
-
-Сдача дня несёт тот же маркер плюс `kind="day"`:
-
-```
-<!-- ephemeris:handoff session="checkout" kind="day" -->
-## 🔄 Передача смены — HH:MM
-```
-
-`resume` ищет `ephemeris:handoff` и находит оба вида. `kind="day"` нужен только
-для проверки «день уже сдан?». Комментарии без имени сессии продолжают
-находиться — это дни, когда сессия была одна.
-
-### Как это читает `resume`
-
-Имя названо — берётся последняя передача **этой** сессии. Не названо — берётся
-свежайшая и перечисляются все сессии, которые сегодня отметились: по маркерам в
-комментариях видно, кто работал.
-
-## Шаблон тела — читать из репы дейликов, не хранить здесь
-
-Канонический шаблон живёт в `README.md` репозитория того контура, в который
-пишешь. **Прочитай его перед тем, как писать тело** — он меняется вместе с тем,
-как меняется отчётность, а копия здесь молча отстанет. И у контуров он **разный**:
-секции, обязательность, регистр лейблов, наличие assignee.
+The canonical template is the `README.md` of that contour's repository. **Read it
+before writing a body** — it changes as the reporting changes, and a copy kept
+here would fall behind in silence.
 
 ```bash
 gh api "repos/$REPO/readme" --jq .content | base64 -d
 ```
 
-Оттуда берутся: список обязательных и опциональных секций, значки, правила
-оформления, требования к регистру текста.
+From there: required and optional sections, the icons, the formatting rules, the
+register the text is written in.
 
-**Шаблон — каркас, а не форма для заполнения.** Обязательные секции обязательны;
-но день диктует и свои — разбор поломки, разбор куска работы — под своим значком
-и со своим заголовком. Живые дейлики так и устроены, и это лучше, чем ровный
-список одинаковых пунктов.
+**The template is a frame, not a form.** Required sections are required; but the
+day also dictates its own — a breakdown of a failure, of a piece of work — under
+its own icon and heading. That is better than an even list of identical items.
 
-## Завести дейлик
+## Open the daily
 
-**1. Проверь, что его ещё нет.** Нашёлся за сегодня по этому проекту — не создавай
-второй, иди в «обновить».
+**1. Step 0.** Exists for today → do not create a second one; move to *update*.
+More than one → handle the duplicate first.
 
-**2. Возьми предыдущий дейлик проекта** и перенеси то, что переживает день:
+**2. Take the project's previous daily** and carry over what outlives a day:
 
-- `🎯 Глобальные задачи` — целиком, со статусами. **Нумерация сквозная и не
-  переиспользуется**: закрытый `E1.11` остаётся номером навсегда, иначе ссылка
-  «см. E1.11» через месяц приведёт не туда.
-- блокеры и ожидания — с указанием, на ком и с какого числа;
-- закрытые вчера пункты не стирай, а помечай закрытыми: по ним видно, где чуть не
-  построили лишнее.
+- `🎯 phase goals` — in full, with statuses. **Numbering runs through and is never
+  reused**: a closed `E1.11` keeps its number forever, otherwise "see E1.11" leads
+  somewhere else a month later;
+- blockers and waits — with who holds them and since when;
+- do not erase yesterday's closed items, mark them closed: they show where you
+  nearly built something unnecessary.
 
-Новые пункты помечай новыми — должно быть видно, что список за сутки вырос, а не
-«всегда таким был».
+Mark new items as new — the list visibly grew by five, it was not "always like
+that".
 
-**3. Собери тело:** стадия, план на день в порядке исполнения, перенесённые задачи
-и ожидания. `✅ Сделано` утром пустое — это нормально.
+**3. Build the body:** stage, the day's plan in order, carried-over goals and
+waits. `✅ Done` is empty in the morning, as it should be.
 
-**4. Покажи мне текст и заголовок до создания.** Создавай после подтверждения:
+**4. Show the title and body before creating.** Create after confirmation:
 
 ```bash
-gh issue create -R "$REPO" --title "<YYYY-MM-DD> — <Проект>" \
-  --label "<Проект>" --assignee "<assignee>" --body-file <файл>
+gh issue create -R "$REPO" --title "<YYYY-MM-DD> — <Project>" \
+  --label "<Project>" --assignee "<login>" --body-file <file>
 ```
 
-## Обновить дейлик
+## Update the daily
 
-По ходу дня, сколько угодно раз. Ничего не фиксирует и передачу не пишет.
+During the day, any number of times. Fixates nothing, writes no handoff.
 
-- **Тело** — правь точечно: статусы в `🎯`, стадия, ожидания. Уже написанные
-  разборы не пересобирай, а дополняй: там живая формулировка, её легко потерять
-  при переписывании. Сессий за день несколько — свои разборы веди в своём блоке,
-  чужие не трогай.
-- **Комментарии** — дописывай devlog: детали, команды, вывод, `file:line`, диффы.
-  Без `humanizer`.
-- Новую задачу заводи новым номером, не переиспользуя старый.
+- **body** — surgically: statuses in `🎯`, stage, waits. Do not rebuild existing
+  write-ups, extend them: the live wording there is easy to lose in a rewrite.
+  Your own write-ups go in your session's block; other blocks stay untouched;
+- **comments** — devlog: detail, commands, output, `file:line`, diffs, in the
+  technical register. First line is the `ephemeris:devlog` marker;
+- a new task gets a new number, never a reused one.
 
-Правило то же: не пиши в дейлик того, чего не сделал. «Сделано» без коммита или
-проверки — это план, и ему место в плане.
+Do not record as done what has no commit and no check behind it. That is a plan,
+and it belongs in the plan.
 
-## Передать сессию
+## Pass the session
 
-Когда кончается контекст, а день продолжается. Особенно у Codex: сессий за день
-несколько, и каждая должна оставить после себя след.
+When the context runs out and the day continues.
 
-**1. Зафиксировать несохранённое** — то же, что при сдаче дня: коммит, пуш,
-worktree из `/tmp`, записи в память и архив.
+**1. Fixate what is unsaved** — commit, push, worktrees out of `/tmp`, writes to
+memory, archive and local docs. The report is written after, not instead.
 
-**2. Написать комментарий-передачу.** Форма та же, что ниже, с двумя отличиями:
+**2. Write the handoff comment.** Same form as below, with two differences:
 
-- маркер с именем сессии: `<!-- ephemeris:handoff session="<имя>" -->`;
-- заголовок `## 🔁 Передача сессии — HH:MM`;
-- **держать её короткой.** Она едет обратно в маленькое окно — то самое, ради
-  которого всё затевается. Развесистая передача съедает то, что должна была
-  сэкономить. Разборы не копируются, на них ставится адрес.
+- heading says it is a session handoff, not the day's;
+- **keep it short.** It travels back into a small context window — the very thing
+  it exists to save. Write-ups are not copied, they get an address.
 
-**Тело дейлика не доводится до финала.** Статусы в `🎯` правятся только там, где
-изменились; стадия остаётся дневной; итогов и сводок нет. День ещё идёт.
+**The body is not brought to its final form.** Statuses in `🎯` change only where
+they changed; the stage stays the day's; no summaries. The day is still running.
 
-## Сдать смену
+## Close the day
 
-**Сдача дня устроена как заведение дейлика: первый делает, остальные дополняют.**
-Не «кто последний уходит» — назначать ответственного не нужно, как не нужно
-договариваться, кто заводит дейлик.
+**Closing works like opening: the first one does it, the rest add to it.** No one
+is appointed, exactly as no one is appointed to open the daily.
 
-Перед началом проверь, есть ли за сегодня комментарий с `kind="day"`.
+From step 0 you already know whether a `kind="day"` comment exists for today.
+**Re-read the comments immediately before writing** — in the interval another
+session may have closed the day.
 
-**Его нет — ты сдаёшь день.** Делаешь всё по порядку ниже: сводишь общие секции,
-пишешь передачу с `kind="day"`, вешаешь `ready-to-close`, проверяешь неделю.
+**It does not exist — you are closing the day.** The order below is mandatory.
 
-**Он есть — день уже сдан другой сессией.** Общие секции не пересобираешь, метку
-повторно не вешаешь, неделю не проверяешь: это сделано. Дописываешь **свою**
-передачу отдельным комментарием ниже, обычным `pass`-видом, и в первой строке
-говоришь, что день закрыт сессией <имя> в таком-то комментарии. Чужой комментарий
-не редактируешь.
+**It exists — the day is already closed by another session.** Do not rebuild the
+shared sections, do not re-apply the label, do not run the weekly sweep: that is
+done. Add **your own** handoff as a separate comment below, in the ordinary pass
+form, and say in its first line who closed the day and in which comment. Do not
+edit their comment.
 
-Порядок ниже обязателен. Отчёт — производная от зафиксированного, поэтому он
-**не может пообещать того, чего ещё нет**.
+### The order
 
-**1. Сначала зафиксировать.** Незакоммиченное закоммитить, ветки запушить,
-worktree из `/tmp` вынести, начатое либо довести, либо честно назвать незакрытым.
-Всё, что уезжает в другие хранилища — память ассистента, чат-экспорт, локальные
-доки, Тритон — записать **сейчас**, до отчёта.
+**1. Fixate first.** Commit the uncommitted, push the branches, move worktrees
+out of `/tmp`, either finish what was started or name it unfinished. Everything
+going to memory, archive or local docs is written **now**, before the report.
 
-**2. Довести дейлик до финального вида.** Чужие блоки сессий при этом не
-переписываются — сводятся только общие секции. То же, что «обновить», но за весь день:
-стадия, `✅ Сделано`, статусы задач, чего ждём, разборы дня своими секциями.
-Детали, диффы, команды, вывод — комментарием-дампом, без `humanizer`. Дейлика
-нет вовсе — сначала заведи его, потом продолжай отсюда.
+**2. Bring the daily to its final form.** The same as *update*, but for the whole
+day: stage, `✅ Done`, goal statuses, waits, the day's write-ups in your block.
+Detail goes into a dump comment. Other sessions' blocks are not rewritten.
 
-**3. Только теперь — комментарий-передача** с `kind="day"`. Отдельным
-комментарием, не внутри дампа.
+**3. Now the handoff comment**, carrying `kind="day"`. A separate comment, not
+inside the dump.
 
-Были сессионные передачи за сегодня — **соберите их адресами, а не пересказом**:
-перечислить с адресами и сказать, что там. Переписывать их содержимое нельзя, они
-остаются на месте как есть; иначе появится вторая версия дня, расходящаяся с первой.
+If the day had session handoffs, **collect them as addresses, not as a retelling**:
+list them with their addresses and say what is in each. Rewriting their content
+would create a second version of the day that drifts from the first.
 
 ```markdown
-**Сессии за день.** три передачи:
-- утренняя, каркас импортёра — #issuecomment-5175291319
-- дневная, разбор падения на главной — #issuecomment-5177450597
-- вечерняя, переводы панели — #issuecomment-5179364121
+**Sessions today.** three handoffs:
+- morning, importer skeleton — #issuecomment-5175291319
+- midday, the front-page failure — #issuecomment-5177450597
+- evening, panel translations — #issuecomment-5179364121
 ```
 
-**4. Повесить `ready-to-close`.** Метка означает ровно одно: день сдан, дейлик
-можно закрывать при следующей чистке.
+**4. Verify the write landed once.** Re-read the comments and confirm there is
+exactly **one** `kind="day"` for today. More than one — say so plainly; a double
+post is the failure mode this step exists to catch.
+
+**5. Apply `ready-to-close`.** The label means one thing: the day is handed over
+and the daily may be closed at the next sweep.
 
 ```bash
 gh issue edit <N> -R "$REPO" --add-label ready-to-close
 ```
 
-Метки нет в этом контуре — создай её с тем же именем и смыслом, не выдумывая
-своего:
+Label missing in this contour — create it with the same meaning rather than
+inventing your own name:
 
 ```bash
 gh label create ready-to-close -R "$REPO" \
-  --description "Дейлик сдан и готов к закрытию при недельной чистке"
+  --description "Daily handed over, ready to close at the weekly sweep"
 ```
 
-`pass` метку **не вешает** — сессия кончилась, а день нет.
+*Pass* does **not** apply the label — the session ended, the day did not.
 
-## Недельная чистка
+## The weekly sweep
 
-Дейлики копятся открытыми, потому что закрывать их посреди недели незачем — они
-ещё могут понадобиться. Разумный момент — когда неделя сменилась.
+Dailies pile up open because closing them mid-week serves nothing — they may
+still be needed. The sensible moment is when the week changes.
 
-**Когда проверять.** При сдаче дня сравни ISO-неделю сегодняшнего дня с неделями
-открытых дейликов этого проекта:
+**When to check.** On closing the day, compare the ISO week of today with the
+weeks of this project's open dailies:
 
 ```bash
-date +%G-W%V                      # текущая неделя
-date -d <YYYY-MM-DD> +%G-W%V      # неделя дейлика
+date +%G-W%V                      # current week
+date -d <YYYY-MM-DD> +%G-W%V      # the daily's week
 ```
 
-Совпали — чистить нечего, молчи. Разошлись — предложи закрыть.
+Same week — nothing to sweep, say nothing. Different — offer to close.
 
-**Что попадает под чистку.** Только пересечение трёх условий:
+**What qualifies.** Only the intersection of three conditions:
 
 ```bash
 gh issue list -R "$REPO" --state open \
-  --label "<Проект>" --label ready-to-close \
+  --label "<Project>" --label ready-to-close \
   --limit 100 --json number,title,createdAt
 ```
 
-- **этот проект** — чужие дейлики не трогаем;
-- **`ready-to-close`** — то есть день был сдан. Дейлик без метки остался открытым
-  не случайно: его не сдавали, и закрывать его молча нельзя;
-- **прошлая неделя или раньше** — текущую не трогаем никогда, даже понедельничную.
+- **this project** — other projects' dailies are not touched;
+- **`ready-to-close`** — the day was handed over. A daily without the label stayed
+  open for a reason: it was never handed over, and closing it silently is wrong;
+- **a previous week or earlier** — never the current one, not even Monday's.
 
-**Как закрывать.** Причина `completed`, работа сделана, а не отменена:
+**How to close.** Reason `completed` — the work was done, not abandoned:
 
 ```bash
 gh issue close <N> -R "$REPO" --reason completed
 ```
 
-**Покажи список и дождись подтверждения.** Закрытие видно всей организации и
-пачкой; ошибка здесь заметна не сразу, а разбирать её придётся руками.
+**Show the list and wait for confirmation.** Closing is visible to the whole
+organisation and happens in a batch; a mistake there is noticed late and undone
+by hand.
 
-## Форма комментария-передачи
+## The shape of a handoff comment
 
 ```markdown
-<!-- ephemeris:handoff -->
-## 🔄 Передача смены — HH:MM
+<!-- ephemeris:handoff session="panel-claude" kind="day" -->
+## 🔄 Shift handoff — HH:MM
 
-**Состояние.** `feat/x` = `abc1234`, влито в main · дерево чистое · worktree в tmp нет ·
-стенд обновлён и открывается
+**State.** `feat/x` = `abc1234`, merged into main · tree clean · no worktrees in
+tmp · staging is up and opens
 
-**Где что лежит.**
-- разбор падения на главной — `#issuecomment-5175291319`
-- ответы заказчика про склады — `ctx:priyomka#i004`
-- вопрос по сплиту платежей — `ctx:priyomka#q007`
-- правки импортёра — `<репо>#110`, PR `<репо>#112`
-- правило «английский на экране ≠ перевод» — память ассистента
+**Where things are.**
+- the front-page failure write-up — `#issuecomment-5175291319`
+- customer answers about warehouses — `ctx:priyomka#i004`
+- payment split question — `ctx:priyomka#q007`
+- importer fixes — `<repo>#110`, PR `<repo>#112`
+- rule "English on screen ≠ a translation" — assistant memory
 
-**Продолжать с.** E1.39 — осталось 337 непереведённых строк, все сознательно;
-список причин записан в файле словаря.
+**Continue from.** E1.39 — 337 untranslated strings left, all of them deliberate;
+the reasons are recorded in the dictionary file.
 
-**Не закрыто.** Почтовый отправитель — блокер запуска, решается не кодом.
+**Not closed.** The mail sender — a launch blocker, not solvable in code.
 ```
 
-Маркер `<!-- ephemeris:handoff -->` первой строкой обязателен: по нему передача
-находится среди остальных комментариев.
+The marker on the first line is mandatory: it is how the handoff is found among
+the other comments. `State`, `Where things are`, `Continue from` are always
+present; `Not closed` when there is something.
 
-Секции `Состояние`, `Где что лежит`, `Продолжать с` — всегда. `Не закрыто` — если есть.
+Write the content itself in the language of the daily.
 
-## Правило адресов
+## The handoff is a map, not a retelling
 
-**Ссылка на материал чат-экспорта пишется только как `ctx:<slug>#<id>.`** Не «в архиве
-проекта», не «мы это обсуждали» — точный идентификатор, иначе следующая сессия его не
-разрешит. Нормативно — `mnemo/SPEC/CITATION.md`.
+**A handoff does not load the next session with content — it says where things
+are.** Retelling the day inside a comment makes a second copy of what is written
+next to it: the copy drifts from the original and spends context doing it.
 
-Остальное пиши как есть. У «прод работает, проверил руками» адреса нет, и выдумывать
-его не надо — но и делать вид, что это проверяемо, тоже: такие строки идут в
-`Состояние`, а не в `Где что лежит`.
+So a handoff is made of addresses. The next session reads it, sees the map and
+**decides for itself** what to open. Not needed — not read. Needed later — it
+comes back and reads, the address has not moved.
 
-Кросс-реповые ссылки — `<owner>/<репо>#110`, не голый `#110`. Голый номер GitHub
-подставит к дейлик-репозиторию, и ссылка уедет не туда.
+This is not economy for its own sake: even in a large window the choice belongs
+to whoever is working, not to whoever wrote the handoff yesterday.
 
-**На комментарий ссылаться его идентификатором, а не положением.** «Комментарий
-выше» перестаёт быть правдой при следующем же комментарии, а `#issuecomment-<id>`
-не сдвинется никогда:
+### Address rules
+
+**A reference to archive material is written only as `ctx:<slug>#<id>`.** Not "in
+the project archive", not "we discussed it" — the exact identifier, otherwise the
+next session cannot resolve it.
+
+**A comment is addressed by its identifier, not by its position.** "The comment
+above" stops being true at the next comment; `#issuecomment-<id>` never moves:
 
 ```bash
 gh api "repos/$REPO/issues/<N>/comments" --jq '.[] | "\(.id)  \(.html_url)"'
 ```
 
-**В передачу не пишется то, чего не сделал.** «Сохранено в память» без файла памяти —
-это не отчёт, а обещание, и следующая сессия обнаружит подлог через час работы не в
-ту сторону. Не успел — пиши в `Не закрыто`.
+**Cross-repo links are `<owner>/<repo>#110`, not a bare `#110`.** GitHub resolves
+a bare number against the daily repo and the link lands elsewhere.
 
-## Поднять смену
+Everything else is written plainly. "Staging opens, checked by hand" has no
+address and does not need an invented one — but it does not get to look verifiable
+either: such lines belong under `State`, not under `Where things are`.
 
-**1. Найти передачу.** Последний комментарий с маркером `<!-- ephemeris:handoff -->`
-в сегодняшнем дейлике; нет сегодняшнего — в последнем по этому лейблу.
+**What was not done is not written into the handoff.** "Saved to memory" with no
+memory file is a promise, not a report, and the next session discovers the
+substitution an hour into the wrong direction. Did not manage it — `Not closed`.
 
-Названа сессия — берётся последняя передача именно её. Не названа — свежайшая, и
-перечисли, какие сессии сегодня отметились.
+## Resume the shift
 
-**2. Пройти по адресам и проверить, что они разрешаются.** Не верить комментарию —
-ходить:
+**1. Find the handoff.** The last comment carrying `<!-- ephemeris:handoff -->`
+in today's daily; no daily for today — in the project's most recent one.
 
-| Адрес | Чем разрешается |
+A session is named — take that session's last handoff. Not named — take the most
+recent one and list which sessions appeared today.
+
+**2. Walk the addresses and check that they resolve.** Do not take the comment's
+word for it:
+
+| Address | Resolved by |
 |---|---|
-| `ctx:<slug>#<id>` | `mnemo_audit.py --export <dir> --json`, либо материал в `raw/` |
+| `ctx:<slug>#<id>` | `mnemo_audit.py --export <dir> --json`, or the material in `raw/` |
 | `<owner>/<repo>#NN` | `gh issue view` / `gh pr view` |
-| sha коммита | `git show --stat` |
-| память ассистента | файл в каталоге памяти проекта |
-| путь | прочитать файл |
+| a commit sha | `git show --stat` |
+| assistant memory | the file in the project's memory directory |
+| a path | read the file |
 
-**3. Доложить.** Что поднялось, что **не** разрешилось, и с чего продолжаем. Адрес не
-открылся — сказать вслух, а не поднимать контекст наполовину и молчать.
+**3. Report three things:** what came back, what did **not** resolve, and what to
+continue from. An address that did not open is said out loud — not half a context
+restored in silence.
 
-Передачи нет вовсе — прочитать тело дейлика и комментарии целиком и сказать, что
-передачи не было.
+No handoff at all — read the body and comments in full and say there was none.
 
-## Границы
+## Boundaries
 
-- **Передача не заменяет devlog-дамп.** Дамп — «что было», передача — «где оно
-  теперь лежит». Одно вместо другого не годится: по дампу не восстановишься, по
-  передаче не поймёшь.
-- **Написанный текст не пересобирается.** Статусы, стадия, ожидания — правятся;
-  разборы дня — только дополняются.
-- **Второй дейлик за день по одному проекту не заводится.** Есть — обновляй.
-- **Список того, что входит в закрытие смены, здесь не зафиксирован намеренно.**
-  Он вырастет из тех дней, когда что-то потерялось.
+- **A handoff does not replace the devlog dump.** The dump is "what happened", the
+  handoff is "where it is now". Neither substitutes for the other: the dump will
+  not restore you, the handoff will not explain anything.
+- **Written text is not rebuilt.** Statuses, stage and waits are edited; the day's
+  write-ups are only extended.
+- **No second daily per day and project.** One exists — update it.
+- **The list of what belongs in closing a day is deliberately not fixed here.** It
+  grows out of the days when something went missing.

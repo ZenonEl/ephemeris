@@ -1,6 +1,6 @@
 # Ephemeris
 
-[![Version](https://img.shields.io/badge/version-0.8.1-6f42c1.svg)](#status)
+[![Version](https://img.shields.io/badge/version-0.9.0-6f42c1.svg)](#status)
 [![Instructions](https://img.shields.io/badge/package-agent%20instructions-0969da.svg)](skills/daily-handoff/SKILL.md)
 [![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE-docs)
@@ -148,8 +148,34 @@ the day, and ownership is written into the status line itself
 (`🔒 blocked, checkout's area`, `🔄 led by checkout`). Comments carry the session
 in their marker, so `resume` can pick up the right thread.
 
+A session takes `main-<agent>` — `main-claude`, `main-codex` — when nobody else
+has written in today's daily yet, and a scope name otherwise: `panel-claude`,
+`orders-codex`. The scope is the area the session works in, not a single task.
+
 Sessions are named, never numbered. "The second session" counts from whoever is
 speaking; for the other session the second one is somebody else.
+
+### Every action reads the live state first
+
+Sessions run in parallel and the issue changes underneath them, so each command
+begins by fetching the daily as it is now: whether one exists for today, whether
+there are two of them, which sessions have written, whether the day is already
+closed. Nothing is taken from memory or from an earlier step of the same
+conversation.
+
+Writes that depend on that reading re-read immediately before writing. The gap
+between reading and writing is where a lost update lives — and where a day once
+got closed twice in the same minute.
+
+Duplicate dailies happen. The one holding the work is kept, the empty twin is
+closed with a reference to it, and both are shown before anything is closed.
+
+### The package is English, the output is not
+
+These instructions are English to keep the agent's context cheap. What a human
+reads is written in that human's language: the daily follows its repository and
+the surrounding issues, and the terminal follows the user. Markers, attribute
+names and status keywords are never translated.
 
 ### Cleanup is explicit
 
@@ -187,14 +213,14 @@ different sets of rules and drift apart unnoticed.
 
 ## Status
 
-Ephemeris is an early `0.8.1` specification package maintained by one author.
+Ephemeris is an early `0.9.0` specification package maintained by one author.
 Its only executable file checks that the version number matches across
 manifests; there are no automated tests, CI, or usage telemetry. The current
 value is the documented handoff protocol and its separation of daily state,
 source evidence, and communication.
 
-Command descriptions and the skill body are written in Russian, the working
-language of its author.
+The package is written in English; what it produces follows the language of the
+daily repository and of the user.
 
 ## Licenses
 

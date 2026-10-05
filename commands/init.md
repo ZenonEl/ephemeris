@@ -1,23 +1,27 @@
 ---
-description: Завести дейлик на сегодня — план дня и перенос вчерашнего
-argument-hint: Проект и при необходимости контур — work | personal
+description: Open today's daily — the day's plan and yesterday's carry-over
+argument-hint: Project; session name and contour (work | personal) if not obvious
 ---
 
-Используй навык **ephemeris:daily-handoff**.
+Use the **ephemeris:daily-handoff** skill.
 
-1. Определи контур: названный явно, иначе по лейблу проекта. Совпали оба
-   или ни одного — спроси, не угадывай.
-2. Проверь, что дейлика за сегодня по этому проекту ещё нет. Есть — не создавай
-   второй, обнови существующий.
-3. Прочитай шаблон из `README.md` репы дейликов — он мог измениться.
-4. Возьми предыдущий дейлик проекта и перенеси то, что переживает день:
-   `🎯 Глобальные задачи` со статусами и сквозной нумерацией, блокеры и ожидания
-   с указанием на ком и с какого числа. Закрытые пункты не стирай, помечай
-   закрытыми. Новые помечай новыми.
-5. Собери тело: стадия, план на день в порядке исполнения, перенесённое.
-   `✅ Сделано` утром пустое — так и должно быть.
+1. **Read the live state first.** Determine the contour, then find today's daily
+   for this project and read its body and comments. One exists — do not create a
+   second, go to `/ephemeris:update`. More than one — handle the duplicate before
+   anything else.
+2. **Take your session name.** Nobody has written yet → `main-<agent>`. Someone
+   has → a scope name `<scope>-<agent>`; unclear → ask once.
+3. **Read the template** from the daily repo's `README.md` — it may have changed.
+4. **Carry over from the project's previous daily**: `🎯 phase goals` with their
+   statuses and running numbering, blockers and waits with who holds them and
+   since when. Closed items are marked, not erased. New ones are marked new.
+5. **Build the body:** stage, the day's plan in order, the carry-over. `✅ Done`
+   is empty in the morning.
 
-Покажи мне заголовок, контур и текст тела **до** создания issue. Создавай после
-подтверждения, с лейблом проекта; assignee — только если он задан у этого контура.
+Show me the title, the contour and the body **before** creating the issue. Create
+after confirmation, with the project label; assignee only if this contour has one,
+as a bare login without `@`.
 
-Проект: $ARGUMENTS
+Write the daily in the language of the daily repository.
+
+Project: $ARGUMENTS

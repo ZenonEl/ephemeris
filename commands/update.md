@@ -1,25 +1,27 @@
 ---
-description: Обновить дейлик по ходу дня — тело и комментарии
-argument-hint: Что записать; имя сессии и контур, если не очевидны
+description: Update today's daily — body and comments
+argument-hint: What to record; session name and contour if not obvious
 ---
 
-Используй навык **ephemeris:daily-handoff**.
+Use the **ephemeris:daily-handoff** skill.
 
-Определи контур по лейблу проекта или по явному указанию, затем найди дейлик
-за сегодня по этому проекту в репе этого контура. Нет — заведи через `/ephemeris:init`,
-не дописывай во вчерашний.
+**Read the live state first:** contour, today's daily for this project, its body
+and comments, and which sessions have already written. No daily — open one with
+`/ephemeris:init`, do not append to yesterday's. Take your session name from what
+that read shows.
 
-Обнови по факту происходящего:
+Record what actually happened:
 
-- **тело** — точечно: статусы в `🎯`, стадия, ожидания, новые задачи новыми
-  номерами. Уже написанные разборы дня не пересобирай, а дополняй; свои разборы
-  веди в блоке своей сессии между маркерами, чужие блоки не трогай;
-- **комментарии** — devlog: детали, команды, вывод, `file:line`, диффы. Без
-  `humanizer`. Первой строкой — `<!-- ephemeris:devlog session="<имя>" -->`.
+- **body** — surgically: statuses in `🎯`, stage, waits, new tasks under new
+  numbers. Do not rebuild existing write-ups, extend them; your own go in your
+  session's block between markers, other blocks stay untouched;
+- **comments** — devlog: detail, commands, output, `file:line`, diffs, technical
+  register. First line is `<!-- ephemeris:devlog session="<name>" -->`.
 
-Это не закрытие дня: ничего не фиксируй и передачу не пиши. Не записывай
-сделанным то, у чего нет коммита или проверки.
+This is not closing the day: fixate nothing and write no handoff. Do not record
+as done what has no commit or check behind it.
 
-Покажи, что собираешься записать, до отправки.
+Write in the language of the daily. Show me what you are about to record before
+sending it.
 
-Записать: $ARGUMENTS
+Record: $ARGUMENTS

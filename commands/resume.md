@@ -1,24 +1,26 @@
 ---
-description: Поднять смену — восстановить контекст по последней передаче в дейлике
-argument-hint: Имя сессии, если их сегодня несколько; проект и контур
+description: Resume the shift — restore context from the last handoff in the daily
+argument-hint: Session name if several ran today; project and contour
 ---
 
-Используй навык **ephemeris:daily-handoff**.
+Use the **ephemeris:daily-handoff** skill.
 
-Определи контур по лейблу проекта или по явному указанию. Найди последний
-комментарий с маркером `<!-- ephemeris:handoff -->` в дейлике за
-сегодня, а если сегодняшнего нет — в последнем дейлике по этому проекту.
+**Read the live state first:** contour, today's daily for this project — or the
+project's most recent one if there is none for today — and its comments.
 
-Названа сессия — бери последнюю передачу именно её. Не названа — бери свежайшую
-и перечисли, какие сессии сегодня отметились.
+Find the last comment carrying `<!-- ephemeris:handoff -->`. A session is named —
+take that session's last handoff. Not named — take the most recent one and list
+which sessions appeared today.
 
-Пройди по каждому адресу и **проверь, что он разрешается**: `ctx:` — в архиве,
-`<owner>/<repo>#NN` — через `gh`, sha — через `git show`, память и пути — чтением.
-Комментарию на слово не верь.
+Walk every address and **check that it resolves**: `ctx:` in the archive,
+`<owner>/<repo>#NN` through `gh`, a sha through `git show`, memory and paths by
+reading them. Do not take the comment's word for it.
 
-Доложи тремя пунктами: что поднялось, что не разрешилось, с чего продолжаем.
-Не разрешившееся назови вслух — не поднимай контекст наполовину молча.
+Report three things: what came back, what did not resolve, what to continue from.
+Say the unresolved ones out loud — do not restore half a context in silence.
 
-Передачи нет — прочитай тело дейлика и комментарии целиком и скажи, что её не было.
+No handoff — read the body and comments in full and say there was none.
 
-Проект: $ARGUMENTS
+Report to me in my language.
+
+Session: $ARGUMENTS

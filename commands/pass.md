@@ -1,27 +1,27 @@
 ---
-description: Передать сессию — кончается контекст, а день продолжается
-argument-hint: Имя сессии; проект и контур — work | personal, если не очевидны
+description: Pass the session — the context runs out, the day continues
+argument-hint: Session name; project and contour (work | personal) if not obvious
 ---
 
-Используй навык **ephemeris:daily-handoff**.
+Use the **ephemeris:daily-handoff** skill.
 
-Определи контур по лейблу проекта или по явному указанию, найди дейлик за сегодня.
+**Read the live state first:** contour, today's daily, its comments, and which
+sessions are present. Confirm your own session name from that read.
 
-1. **Зафиксируй несохранённое:** коммит, пуш, worktree из `/tmp` наружу, записи в
-   память и архив. Отчёт пишется после, а не вместо.
-2. **Допиши комментарий-передачу** с маркером
-   `<!-- ephemeris:handoff session="<имя>" -->` и заголовком
-   `## 🔁 Передача сессии — HH:MM`. Имя сессии не названо — спроси один раз.
+1. **Fixate what is unsaved:** commit, push, worktrees out of `/tmp`, writes to
+   memory, archive and local docs. The report is written after, not instead.
+2. **Add the handoff comment** with
+   `<!-- ephemeris:handoff session="<name>" -->` on the first line and a session
+   handoff heading. Then re-read the comments and confirm it posted once.
 
-Тело дейлика до финала **не доводи** — день ещё идёт. Статусы в `🎯` правь только
-там, где изменились, и только свои. Разборы — в блоке своей сессии, чужие блоки
-не трогай.
+**Do not bring the body to its final form** — the day is still running. Statuses
+in `🎯` only where they changed, and only yours. Write-ups go in your session's
+block; other blocks stay untouched.
 
-**Передача — карта, а не пересказ.** Держи её короткой: она поедет обратно в
-маленькое окно. Разборы не копируй, ставь на них адрес — комментарий адресуется
-идентификатором `#issuecomment-<id>`, а не словами «выше». Не успел — секция
-`Не закрыто`.
+**The handoff is a map, not a retelling.** Keep it short — it travels back into a
+small context window. Do not copy write-ups, address them: a comment is addressed
+by `#issuecomment-<id>`, never by "above". Did not manage something — `Not closed`.
 
-Покажи мне текст до отправки.
+Write the comment in the language of the daily. Show me the text before sending.
 
-Проект: $ARGUMENTS
+Session: $ARGUMENTS
